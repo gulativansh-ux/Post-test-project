@@ -34,3 +34,17 @@ class UserResponse(BaseModel):
     name: str
     email: EmailStr
     role: str
+    
+    
+class HiringFacts(BaseModel):
+    title: str | None = Field(default=None)
+    salary_min: int | None = Field(default=None)
+    salary_max: int | None = Field(default=None)
+    headcount: int | None = Field(default=None)
+    required_skills: list[str] | None = Field(default=None)
+    languages: list[str] | None = Field(default=None)
+    tech_stacks: list[str] | None = Field(default=None)
+    job_tags: list[str] | None = Field(default=None)
+    years_of_experience_min: int | None = Field(default=None)
+    years_of_experience_max: int | None = Field(default=None)
+    jd_text: str | None = Field(default=None)    

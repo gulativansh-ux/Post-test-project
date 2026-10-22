@@ -10,13 +10,10 @@ from datetime import timedelta
 from requestModel.index import UserResponse
 
 
-
 router = APIRouter()
 settings = get_settings()
 
 def user_to_response(user: User, session: SessionDep):
-    # Extra query on purpose: User only has role_id (a number).
-    # We load Role ourselves to get the name ("superadmin" / "recruiter").
     role = session.get(Role, user.role_id)
     return UserResponse(
         id=user.id,
@@ -37,5 +34,4 @@ async def read_user_me(userDetail: UserLogin, session: SessionDep):
     access_token = create_access_token (
         data={"sub": userExist.email}, expires_delta=access_token_expires
     )
-    # return Token(access_token=access_token, token_type="bearer")
     return { "access_token" : access_token, "token_type" : "bearer", "user": user_to_response(userExist, session),  }

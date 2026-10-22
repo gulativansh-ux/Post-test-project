@@ -1,4 +1,5 @@
 from sqlmodel import Field, SQLModel
+from datetime import datetime
 
 
 # We use the config table=True to tell SQLModel that this is a table model, it represents a table.
@@ -45,4 +46,28 @@ class JobRequest(SQLModel, table=True):
     assigned_to: int = Field(foreign_key="user.id")  
     extraction_status: str = "idle"
     
-
+    
+class Jobs(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    job_request_id: int = Field(foreign_key="jobrequest.id")
+    client_id: int = Field(foreign_key="client.id")
+    position_title: str
+    salary_min: int | None = None
+    salary_max: int | None = None
+    headcount: int | None = None
+    search_location: str
+    required_skills: str | None = None
+    languages: str | None = None
+    tech_stacks: str | None = None
+    job_tags: str | None = None
+    years_of_experience_min: int | None = None
+    years_of_experience_max: int | None = None
+    jd_text: str | None = None
+    observation: str | None = None
+    urgency: str
+    status: str = "draft"
+    recruiter_id: int = Field(foreign_key="user.id")
+    extraction_status: str = "idle"
+    extraction_error: str | None = None
+    created_at: datetime
+    

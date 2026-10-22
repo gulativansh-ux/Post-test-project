@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from database.connection import create_db_and_tables, check_and_run_seed
-from routers import auth, client, job_request, recruiter  
+from routers import auth, client, job_request, recruiter, jobs  
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -8,6 +8,7 @@ app.include_router(auth.router)
 app.include_router(client.client_router)
 app.include_router(job_request.job_request_router)
 app.include_router(recruiter.recruiter_router)
+app.include_router(jobs.jobs_router)
 
 
 app.add_middleware(
