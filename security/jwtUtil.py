@@ -9,10 +9,50 @@ from jwt.exceptions import InvalidTokenError
 from database.connection import SessionDep
 from database.model import User
 from sqlmodel import select
+from fastapi import WebSocket
 
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
+
+
+async def authenticate_websocket_user(
+    websocket: WebSocket,
+    session: SessionDep,
+):
+    token = websocket.query_params.get("token")
+
+    if not token:
+        print("WebSocket authentication failed: token missing")
+        return None
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+
+        user_email = payload.get("sub")
+
+        if not user_email:
+            print("WebSocket authentication failed: subject missing")
+            return None
+
+        user = session.exec(
+            select(User).where(User.email == user_email.lower())
+        ).first()
+
+        if user is None:
+            print(f"WebSocket authentication failed: user not found: {user_email}")
+            return None
+
+        print(f"WebSocket authenticated for user ID: {user.id}")
+        return user.id
+
+    except InvalidTokenError as exc:
+        print(f"WebSocket authentication failed: {type(exc).__name__}")
+        return None
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):

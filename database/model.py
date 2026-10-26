@@ -71,3 +71,12 @@ class Jobs(SQLModel, table=True):
     extraction_error: str | None = None
     created_at: datetime
     
+
+
+class Notification(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    title: str
+    message: str
+    job_id: int | None = Field(default=None, foreign_key="jobs.id")
+    is_read: bool = Field(default=False, index=True)

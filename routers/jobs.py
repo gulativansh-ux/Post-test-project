@@ -75,7 +75,7 @@ async def fullfill_request(
             salary_max=row_detail.salary_max,
             headcount=row_detail.headcount,
             search_location=row_detail.search_location,
-            observations=row_detail.observation,
+            observation=row_detail.observation,
             urgency=row_detail.urgency,
             status="draft",
             recruiter_id=row_detail.assigned_to,
@@ -107,9 +107,9 @@ async def fetch_jobs(
         Client.name.label("client_name"), 
         User.name.label("recruiter_name")
     ).join(
-        Client, Jobs.client_id == Client.id, isouter=True  # Use isouter=True (LEFT JOIN) if IDs can be null
+        Client, Jobs.client_id == Client.id
     ).join(
-        User, Jobs.recruiter_id == User.id, isouter=True
+        User, Jobs.recruiter_id == User.id
     ).order_by(desc(Jobs.id))
 
     if roleDetail == "superadmin":
@@ -118,7 +118,6 @@ async def fetch_jobs(
         allowed_id = session.exec(
             select(JobRequest.id).where(JobRequest.assigned_to == userDetail.id)
         ).all()
-        
         result = session.exec(
             base_query.where(Jobs.job_request_id.in_(allowed_id))
         ).all()
@@ -132,5 +131,31 @@ async def fetch_jobs(
 
     return fetch_data
 
+
+@jobs_router.get("/fetch-job-detail")
+async def fetch_job_detail(
+    requested_job_id: int,
+    session: SessionDep,
+    userDetail: dict = Depends(get_current_user),
+):
     
+    statement = (
+        select(Jobs, Client.name.label("client_name"))
+        .join(Client, Jobs.client_id == Client.id, isouter=True)
+        .where(Jobs.id == requested_job_id)
+    )
     
+    result = session.exec(statement).first() 
+    
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Requested Job Does Not Exist",
+        )
+        
+    job_obj, client_name = result
+    
+    job_detail_dict = job_obj.model_dump()
+    job_detail_dict["client_name"] = client_name
+
+    return job_detail_dict
